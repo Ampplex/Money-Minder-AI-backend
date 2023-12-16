@@ -15,22 +15,19 @@ def ExpensePredictor():
     if request.method == 'POST':
         # Access the data sent with the POST request
         data = request.json  # Assuming the data is in JSON format
+        # print(data["data"],data["category"])
 
         # Process the data
-        if isinstance(data, list):
-            result = process_data(data)
-            return jsonify({'result': result})
-        else:
-            return jsonify({'error': 'Invalid data format'})
+        result = process_data(data["data"], data["category"], data["time"])
+        return jsonify({'result': result})
 
-def process_data(data):
-    print(data)  # Verify the structure of the input data
+
+def process_data(data, category, time):
 
     # Convert data to DataFrame
     df = pd.DataFrame(data)
 
-    if 'category' not in df.columns:
-        return {'error': 'Category column not found in input data'}
+    df["category"] = category
 
     df["time"] = pd.to_datetime(df["time"])
 
@@ -70,7 +67,7 @@ def process_data(data):
     pipeline.fit(X, y)
 
     # Input data for predicting future expenses (adjust as needed)
-    input_time = pd.to_datetime(df['time'].iloc[0])
+    input_time = pd.to_datetime(time)
     input_category = df['category'].iloc[0]
 
     # Convert input time to UNIX timestamp
