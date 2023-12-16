@@ -17,32 +17,33 @@ def ExpensePredictor():
         data = request.json  # Assuming the data is in JSON format
 
         # Process the data
-        result = process_data(data['data'], data["category"], data["time"])
-        print(result)
+        if isinstance(data, list):
+            result = process_data(data)
+            return jsonify({'result': result})
+        else:
+            return jsonify({'error': 'Invalid data format'})
 
-        # Return a JSON response
-        return jsonify({'result': result})
-
-def process_data(data, category, time):
+def process_data(data):
     print(data)  # Verify the structure of the input data
 
     # Convert data to DataFrame
     df = pd.DataFrame(data)
+
+    if 'category' not in df.columns:
+        return {'error': 'Category column not found in input data'}
+
     df["time"] = pd.to_datetime(df["time"])
 
     # Convert Timestamps to Unix timestamps (int64)
-    df["time"] = (df["time"].astype(np.int64) // 10**9)
+    df["time_unix"] = (df["time"].astype(np.int64) // 10**9)
 
     # Encode the "Category" variable
     label_encoder = LabelEncoder()
     df["category_encoded"] = label_encoder.fit_transform(df["category"])
 
     # Extract features (time and category) and target variable (amount)
-    X = df[["time", "category_encoded"]]
+    X = df[["time_unix", "category_encoded"]]
     y = df["amount"]
-
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Create a ColumnTransformer with a StandardScaler for the time feature
     time_transformer = Pipeline([
@@ -52,7 +53,7 @@ def process_data(data, category, time):
     # Combine transformers using ColumnTransformer
     preprocessor = ColumnTransformer(
         transformers=[
-            ('time', time_transformer, ['time']),
+            ('time', time_transformer, ['time_unix']),
         ]
     )
 
@@ -65,22 +66,22 @@ def process_data(data, category, time):
         ('model', model)
     ])
 
-    # Train the model
-    pipeline.fit(X_train, y_train)
+    # Train the model using the entire dataset
+    pipeline.fit(X, y)
 
     # Input data for predicting future expenses (adjust as needed)
-    input_time = datetime.strptime(time, "%Y-%m-%d")
-    input_category = category
+    input_time = pd.to_datetime(df['time'].iloc[0])
+    input_category = df['category'].iloc[0]
 
     # Convert input time to UNIX timestamp
     input_time_unix = input_time.timestamp() // 10**9
 
     # Transform input data using the preprocessor
-    input_data = pd.DataFrame({'time': [input_time_unix]})
+    input_data = pd.DataFrame({'time_unix': [input_time_unix]})
     predicted_amount = pipeline.predict(input_data)
 
     print(f"Predicted Expense Amount for {input_category} on {input_time} : {predicted_amount}")
-    return predicted_amount[0]
+    return {'predicted_amount': predicted_amount[0]}
 
 
 if __name__ == '__main__':
