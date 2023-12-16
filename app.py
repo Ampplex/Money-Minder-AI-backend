@@ -23,11 +23,13 @@ def ExpensePredictor():
 
 
 def process_data(data, category):
+    print(data)  # Verify the structure of the input data
 
     # Convert data to DataFrame
     df = pd.DataFrame(data)
 
     df["category"] = category
+        
 
     df["time"] = pd.to_datetime(df["time"])
 
@@ -67,7 +69,7 @@ def process_data(data, category):
     pipeline.fit(X, y)
 
     # Input data for predicting future expenses (adjust as needed)
-    input_time = pd.to_datetime(df["time"])
+    input_time = pd.to_datetime(df['time'].iloc[0])
     input_category = df['category'].iloc[0]
 
     # Convert input time to UNIX timestamp
