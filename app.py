@@ -21,7 +21,7 @@ def ExpensePredictor():
         print(result)
 
         # Return a JSON response
-        return jsonify({'result': "success"})
+        return jsonify({'result': result})
 
 def process_data(data, category, time):
     print(data)  # Verify the structure of the input data

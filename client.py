@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 
 # Replace the URL with the actual URL of your Flask server
-url = 'http://127.0.0.1:5000/'
+url = 'https://money-minder-ai.onrender.com/'
 
 # Data to be sent with the POST request (in JSON format)
 data = [
