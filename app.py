@@ -82,6 +82,9 @@ def process_data(data, category):
     print(f"Predicted Expense Amount for {input_category} on {input_time} : {predicted_amount}")
     return {'predicted_amount': predicted_amount[0]}
 
+@app.route('/server_activator')
+def server_activator():
+    return jsonify({'msg': 'AI activated'})
 
 if __name__ == '__main__':
     app.run(debug=True)
