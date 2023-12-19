@@ -66,9 +66,10 @@ def process_data(predict_data):
     # Predict using the trained model
     predicted_amount = model.predict(X_predict)
 
-    print(predicted_amount)
+    predicted_amount = [abs(data) for data in predicted_amount.tolist()]
 
-    return {'predicted_amount': predicted_amount.tolist()}
+    print(predicted_amount)
+    return {'predicted_amount': predicted_amount}
 
 @app.route('/server_activator')
 def server_activator():
